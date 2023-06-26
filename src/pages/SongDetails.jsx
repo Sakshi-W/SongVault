@@ -1,18 +1,26 @@
-import { useParams } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { DetailsHeader, Error, Loader, RelatedSongs } from "../components";
-import { setActiveSong, playPause } from "../redux/features/playerSlice";
-import { useGetSongRelatedQuery, useSongDetailsQuery } from "../redux/services/shazamCore";
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { DetailsHeader, Error, Loader, RelatedSongs } from '../components';
+
+import { setActiveSong, playPause } from '../redux/features/playerSlice';
+import { useGetSongDetailsQuery, useGetSongRelatedQuery } from '../redux/services/shazamCoreSlice';
 
 const SongDetails = () => {
   const dispatch = useDispatch();
-  const { songid } = useParams();
+  const { songid, id: artistId } = useParams();
   const { activeSong, isPlaying } = useSelector((state) => state.player);
-  const { data: songData, isFetching: isFetchingSongDetails } = useSongDetailsQuery({ songid });
-  const { data, isFetching: isFetchingRelatedSongs, error } = useGetSongRelatedQuery({ songid });
+
+  const { data, isFetching: isFetchinRelatedSongs, error } = useGetSongRelatedQuery({ songid });
+  const { data: songData, isFetching: isFetchingSongDetails } = useGetSongDetailsQuery({ songid });
+
+  if (isFetchingSongDetails && isFetchinRelatedSongs) return <Loader title="Searching song details" />;
+
+  console.log(songData);
+
+  if (error) return <Error />;
 
   const handlePauseClick = () => {
-    dispatch(setActiveSong(null));
     dispatch(playPause(false));
   };
 
@@ -21,36 +29,36 @@ const SongDetails = () => {
     dispatch(playPause(true));
   };
 
-  if (isFetchingSongDetails || isFetchingRelatedSongs) {
-    return <Loader title="Searching song details" />;
-  }
-  if (error) {
-    return <Error />;
-  }
   return (
     <div className="flex flex-col">
-      <DetailsHeader artistId="" songData={songData} />
-      <div>
-        <h2 className="text-white text-3xl font-bold">Lyrics: </h2>
+      <DetailsHeader
+        artistId={artistId}
+        songData={songData}
+      />
+
+      <div className="mb-10">
+        <h2 className="text-white text-3xl font-bold">Lyrics:</h2>
+
         <div className="mt-5">
-          {songData?.sections[1]?.type === "LYRICS" ? (
-            songData?.sections[1]?.text.map((Line, index) => (
-              <p key={index} className="text-gray-400 text-base my-1">
-                {Line}
-              </p>
+          {songData?.lyrics?.sections[0]?.type === 'LYRICS'
+            ? songData?.lyrics?.sections[0]?.text.map((line, i) => (
+              <p key={`lyrics-${line}-${i}`} className="text-gray-400 text-base my-1">{line}</p>
             ))
-          ) : (
-            <p className="text-gray-400 text-base my-1">Sorry, no lyrics found</p>
-          )}
+            : (
+              <p className="text-gray-400 text-base my-1">Sorry, No lyrics found!</p>
+            )}
         </div>
       </div>
+
       <RelatedSongs
         data={data}
+        artistId={artistId}
         isPlaying={isPlaying}
         activeSong={activeSong}
         handlePauseClick={handlePauseClick}
         handlePlayClick={handlePlayClick}
       />
+
     </div>
   );
 };

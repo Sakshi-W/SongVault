@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useSelector } from 'react-redux';
 import{Error, Loader, SongCard} from '../components';
-import { useGetTopChartsQuery } from '../redux/services/shazamCore';
+import { useGetTopChartsQuery } from '../redux/services/shazamCoreSlice';
 
 const TopCharts = () => {
     const{activeSong, isPlaying}=useSelector((state)=state.player);
@@ -38,4 +38,6 @@ const TopCharts = () => {
 };
     
 
-export default AroundYou;
+
+export default TopCharts;
+
