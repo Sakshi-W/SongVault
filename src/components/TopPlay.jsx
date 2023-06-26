@@ -4,14 +4,13 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { FreeMode } from 'swiper';
-import { playPause, setActiveSong } from '../redux/features/playerSlice';
+
 import PlayPause from './PlayPause';
-import { useGetTopChartsQuery } from '../redux/services/shazamCoreSlice';
+import { playPause, setActiveSong } from '../redux/features/playerSlice';
+import { useGetTopChartsQuery } from '../redux/services/shazamCore';
+
 import 'swiper/css';
 import 'swiper/css/free-mode';
-
-// Rest of the code remains the same
-
 
 const TopChartCard = ({ song, i, isPlaying, activeSong, handlePauseClick, handlePlayClick }) => (
   <div className={`w-full flex flex-row items-center hover:bg-[#4c426e] ${activeSong?.title === song?.title ? 'bg-[#4c426e]' : 'bg-transparent'} py-2 p-4 rounded-lg cursor-pointer mb-2`}>
@@ -44,12 +43,14 @@ const TopChartCard = ({ song, i, isPlaying, activeSong, handlePauseClick, handle
 const TopPlay = () => {
   const dispatch = useDispatch();
   const { activeSong, isPlaying } = useSelector((state) => state.player);
-  const { data } = useGetTopChartsQuery({});
+  const { data } = useGetTopChartsQuery();
   const divRef = useRef(null);
 
   useEffect(() => {
     divRef.current.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+  });
+
+  const topPlays = data?.slice(0, 5);
 
   const handlePauseClick = () => {
     dispatch(playPause(false));
@@ -71,7 +72,7 @@ const TopPlay = () => {
         </div>
 
         <div className="mt-4 flex flex-col gap-1">
-          {data?.slice(0, 5)?.map((song, i) => (
+          {topPlays?.map((song, i) => (
             <TopChartCard
               key={song.key}
               song={song}
@@ -102,7 +103,7 @@ const TopPlay = () => {
           modules={[FreeMode]}
           className="mt-4"
         >
-          {data?.slice(0, 5)?.map((artist) => (
+          {topPlays?.slice(0, 5).map((artist) => (
             <SwiperSlide
               key={artist?.key}
               style={{ width: '25%', height: 'auto' }}

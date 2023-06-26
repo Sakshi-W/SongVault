@@ -5,10 +5,12 @@ import playerReducer from './features/playerSlice';
 
 export const store = configureStore({
   reducer: {
+    [shazamCoreApi.reducerPath]: shazamCoreApi.reducer, 
     [shazamCoreApi.reducerPath]: shazamCoreApi.reducer,
     player: playerReducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(shazamCoreApi.middleware),
-});import shazamCoreApi from '../redux/services/shazamCore';
 
+  },
+  middleware:(getDefaultMiddleware)=> getDefaultMiddleware().concat(shazamCoreApi.middleware), 
+});
+ 
+export default store;
